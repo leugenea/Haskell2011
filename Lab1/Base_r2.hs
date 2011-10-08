@@ -340,6 +340,7 @@ rsub a b = rplus a (rnegate b)
 
 -- * деление
 rdiv :: Rational -> Rational -> Rational
+rdiv a (Rat Zero' y) = error "Devision by zero!"
 rdiv (Rat a b) (Rat (Plus x) y) = rnormalize (Rat (znmul a y) (nmul b x))
 rdiv r (Rat (Minus x) y) = rnormalize (rnegate (rdiv r (Rat (Plus x) y)))
 
