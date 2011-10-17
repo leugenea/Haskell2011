@@ -56,12 +56,20 @@ betaRecuct var what term =
 	            newvar = newname ((free what) ++ (free t)) v
 
 -- Нормализация нормальным порядком терма term
--- normal' :: Term -> Term
--- normal' term = ?
+normal' :: Term -> Term
+normal' (Var var) = (Var var)
+normal' (Abs var term) = Abs var (normal' term)
+normal' (App term1 term2) = 
+    case term1 of
+        Var var      -> App term1 (normal' term2)
+        Abs var term -> normal' (betaRecuct var term2 term)
+        App t1 t2    -> case newterm1 of
+            Var nvar          -> App newterm1 (normal' term2)
+            Abs nvar nterm    -> normal' (betaRecuct nvar  term2 nterm)
+            App nterm1 nterm2 -> App nterm1 (normal' term2)
+          where newterm1 = normal' term1
 
 -- Эти строчки после реализации стереть
-normal' :: Term -> Term
-normal' = undefined
 
 -- Нормализация аппликативным порядком терма term
 applicative' :: Term -> Term
