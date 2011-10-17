@@ -64,8 +64,18 @@ normal' :: Term -> Term
 normal' = undefined
 
 -- Нормализация аппликативным порядком терма term
--- applicative' :: Term -> Term
--- applicative' term = ?
+applicative' :: Term -> Term
+applicative' (Var var) = Var var
+applicative' (Abs var term) = Abs var (applicative' term)
+applivative' (App term1 term2) =
+    case term1 of
+        Var var      -> App term1 (applicative' term2)
+	Abs var term -> betaRecuct var (applicative' term2) term
+	App t1 t2    -> case newterm1 of
+	    Var nvar          -> App newterm1 (applicative' term2)
+	    Abs nvar nterm    -> betaRecuct nvar (applicative' term2) nterm
+	    App nterm1 nterm2 -> App nterm1 (applicative' term2)
+	  where newterm1 = applicative' term1
 
 -- Эти строчки после реализации стереть
 
