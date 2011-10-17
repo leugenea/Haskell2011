@@ -42,8 +42,18 @@ iterate f x = (:) x $ iterate f (f x)
 newname fv v = head . filter (\x -> not . elem x $ fv) . iterate ('_':) $ v
 
 -- Обычная бета-редукция, хендлящая переименования переменных
--- betaRecuct :: Varible -> Term -> Term -> Term
--- betaRecuct var what term = ?
+betaRecuct :: Varible -> Term -> Term -> Term
+betaRecuct var what term =
+    case term of
+        Var v     -> if v == var
+	    then what
+	    else term
+	App t1 t2 -> App (betaRecuct var what t1) (betaRecuct var what t2)
+	Abs v t   -> if v == var
+	    then term
+	    else Abs v (betaRecuct var newwhat t) where
+	        newwhat = subst v (Var (newvar)) what where
+	            newvar = newname ((free what) ++ (free t)) v
 
 -- Нормализация нормальным порядком терма term
 -- normal' :: Term -> Term
@@ -58,8 +68,6 @@ normal' = undefined
 -- applicative' term = ?
 
 -- Эти строчки после реализации стереть
-applicative' :: Term -> Term 
-applicative' = undefined
 
 -- Маркер конца ресурсов
 data TooLoong = TooLoong deriving Show
