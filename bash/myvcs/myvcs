@@ -1,0 +1,125 @@
+#!/bin/bash
+
+function minit() {
+	if ( !(test -d ".$1") )
+	then
+		mkdir ".$1"
+		if (test -e ./".$1"/log)
+		then
+			rm ./".$1"/log
+		fi
+		touch ./".$1"/log
+		echo "Init: dirctory \".$1\" was created" >> ./".$1"/log
+	else
+		if (test -e ./".$1"/log)
+		then
+			rm ./".$1"/log
+		fi
+		touch ./".$1"/log
+	fi
+	touch ./".$1"/lastrev
+	echo "Initialized"
+	echo "Init: initialized" >> ./".$1"/log
+}
+
+function mcommit() {
+	cmp ./".$1"/lastrev "$1" >> /dev/null 2>&1
+	if [ $? -eq 0 ]
+	then
+		echo "File wasn't changed"
+		return 0
+	fi
+
+	cd ./".$1"/
+	local num=0
+	while ( test -e "$num.patch" );
+	do
+		num=$(($num + 1))
+	done
+	patchname="$num.patch"
+	touch $patchname
+	touch lastrev
+	diff -u lastrev ../"$1" > $patchname
+	echo "Commited successfully. Number of last revision is $num"
+	echo "Commit: commited successfully, number of last revision is $num" >> log
+	cp ../"$1" lastrev
+	cd ..
+}
+
+function mstatus() {
+	cmp ./".$1"/lastrev "$1" > /dev/null 2>&1
+	if [ $? -eq 0 ]
+	then
+		echo "Nothing changed"
+		echo "Status: nothing changed" >> ./".$1"/log
+	else
+		echo "File $1 was changed"
+		echo "Status: file $1 was changed" >> ./".$1"/log
+		exit 1
+	fi
+}
+
+function mdiff() {
+	diff -u "$1" ./".$1"/lastrev
+	echo "Diff: diff was viewed" >> ./".$1"/log
+}
+
+function mupdate() {
+	cd ./".$1"
+	echo "" > temp
+	for (( num=0; num<=$2; num++ ))
+	do
+		patchname="$num.patch"
+		if ( !( test -e "$num.patch" ) )
+		then
+			echo "There's no revision with this number yet"
+			exit 1
+		fi
+		patch temp -i $patchname > /dev/null 2>&1
+		echo "Patch #$num applied"
+	done
+	cp temp ../"$1"
+	echo "Update: successfully updated to revision $2"
+	echo "Successfully updated to revision $2"
+	cd ..
+}
+
+function mhelp() {
+	echo "	init [file] -- create repo
+	commit [file] -- commit changes (if there are no changes, do nothing)
+	status [file] -- print status of repo (is any changes)
+	diff [file] -- print unified diff
+	update [file] [rev] -- updates to the revision
+	help -- prints this help
+	"
+}
+
+case "$1" in
+	"init")
+		minit "$2"
+	;;
+
+	"commit")
+		mcommit "$2"
+	;;
+
+	"status")
+		mstatus "$2"
+	;;
+
+	"diff")
+		mdiff "$2"
+	;;
+
+	"update")
+		mupdate "$2" "$3"
+	;;
+
+	"help")
+		mhelp
+	;;
+	*)
+		echo "Invalid command"
+		mhelp
+	;;
+esac
