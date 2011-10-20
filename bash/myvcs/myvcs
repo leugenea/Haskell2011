@@ -11,12 +11,10 @@ function minit() {
 		touch ./".$1"/log
 		echo "Init: dirctory \".$1\" was created" >> ./".$1"/log
 	else
-		if (test -e ./".$1"/log)
-		then
-			rm ./".$1"/log
-		fi
-		touch ./".$1"/log
+		echo "Directory $1 already exists"
+		return 1
 	fi
+	echo "0" > ./".$1"/revnum
 	touch ./".$1"/lastrev
 	echo "Initialized"
 	echo "Init: initialized" >> ./".$1"/log
@@ -31,17 +29,24 @@ function mcommit() {
 	fi
 
 	cd ./".$1"/
-	local num=0
-	while ( test -e "$num.patch" );
-	do
-		num=$(($num + 1))
-	done
+	num=$(cat revnum)
 	patchname="$num.patch"
+	if ( test -e $patchname )
+	then
+		while ( test -e "$num.patch" )
+		do
+			rm "$num.patch"
+			((num++))
+		done
+		num=$(cat revnum)
+	fi
 	touch $patchname
 	touch lastrev
 	diff -u lastrev ../"$1" > $patchname
 	echo "Commited successfully. Number of last revision is $num"
 	echo "Commit: commited successfully, number of last revision is $num" >> log
+	num=$(($num+1))
+	echo $num > revnum
 	cp ../"$1" lastrev
 	cd ..
 }
@@ -53,20 +58,22 @@ function mstatus() {
 		echo "Nothing changed"
 		echo "Status: nothing changed" >> ./".$1"/log
 	else
-		echo "File $1 was changed"
+		echo "File \"$1\" was changed"
 		echo "Status: file $1 was changed" >> ./".$1"/log
 		exit 1
 	fi
 }
 
 function mdiff() {
-	diff -u "$1" ./".$1"/lastrev
+	diff -u ./".$1"/lastrev "$1"
 	echo "Diff: diff was viewed" >> ./".$1"/log
 }
 
 function mupdate() {
 	cd ./".$1"
-	echo "" > temp
+	touch temp
+	rm temp
+	touch temp
 	for (( num=0; num<=$2; num++ ))
 	do
 		patchname="$num.patch"
@@ -79,8 +86,9 @@ function mupdate() {
 		echo "Patch #$num applied"
 	done
 	cp temp ../"$1"
-	echo "Update: successfully updated to revision $2"
+	echo "Update: successfully updated to revision $2" >> log
 	echo "Successfully updated to revision $2"
+	echo $(($2+1)) > revnum
 	cd ..
 }
 
