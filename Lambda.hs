@@ -42,16 +42,16 @@ iterate f x = (:) x $ iterate f (f x)
 newname fv v = head . filter (\x -> not . elem x $ fv) . iterate ('_':) $ v
 
 -- Обычная бета-редукция, хендлящая переименования переменных
-betaRecuct :: Varible -> Term -> Term -> Term
-betaRecuct var what term =
+betaReduct :: Varible -> Term -> Term -> Term
+betaReduct var what term =
     case term of
         Var v     -> if v == var
 	    then what
 	    else term
-	App t1 t2 -> App (betaRecuct var what t1) (betaRecuct var what t2)
+	App t1 t2 -> App (betaReduct var what t1) (betaReduct var what t2)
 	Abs v t   -> if v == var
 	    then term
-	    else Abs v (betaRecuct var newwhat t) where
+	    else Abs v (betaReduct var newwhat t) where
 	        newwhat = subst v (Var (newvar)) what where
 	            newvar = newname ((free what) ++ (free t)) v
 
@@ -62,10 +62,10 @@ normal' (Abs var term) = Abs var (normal' term)
 normal' (App term1 term2) = 
     case term1 of
         Var var      -> App term1 (normal' term2)
-        Abs var term -> normal' (betaRecuct var term2 term)
+        Abs var term -> normal' (betaReduct var term2 term)
         App t1 t2    -> case newterm1 of
             Var nvar          -> App newterm1 (normal' term2)
-            Abs nvar nterm    -> normal' (betaRecuct nvar  term2 nterm)
+            Abs nvar nterm    -> normal' (betaReduct nvar  term2 nterm)
             App nterm1 nterm2 -> App nterm1 (normal' term2)
           where newterm1 = normal' term1
 
@@ -78,10 +78,10 @@ applicative' (Abs var term) = Abs var (applicative' term)
 applivative' (App term1 term2) =
     case term1 of
         Var var      -> App term1 (applicative' term2)
-	Abs var term -> betaRecuct var (applicative' term2) term
+	Abs var term -> betaReduct var (applicative' term2) term
 	App t1 t2    -> case newterm1 of
 	    Var nvar          -> App newterm1 (applicative' term2)
-	    Abs nvar nterm    -> betaRecuct nvar (applicative' term2) nterm
+	    Abs nvar nterm    -> betaReduct nvar (applicative' term2) nterm
 	    App nterm1 nterm2 -> App nterm1 (applicative' term2)
 	  where newterm1 = applicative' term1
 
@@ -90,22 +90,52 @@ applivative' (App term1 term2) =
 -- Маркер конца ресурсов
 data TooLoong = TooLoong deriving Show
 
+strat :: (Term -> (Bool, Term)) -> Int -> Term -> Either TooLoong (Int, Term)
+strat st n term = if n < 0 then error "n < 0 !!1"
+                           else if r then if (n == 0) then Left TooLoong
+			                              else strat st (n-1) t
+				     else Right (n, t)
+			     where (r, t) = st term
+
 -- (*) Нормализация нормальным порядком терма term за неболее чем n шагов.
 -- Результат: Или числа итераций недостаточно, чтобы достичь нормальной
 -- формы. Или (число нерастраченных итераций, терм в нормальной форме).
--- 
--- normal :: Int -> Term -> Either TooLoong (Int, Term)
--- normal n term = ?
+
+normSt :: Term -> (Bool, Term)
+normSt (Var v) = (False, Var v)
+normSt (Abs v t) = (res, Abs v new)
+                     where (res, new) = normSt t
+normSt (App term1 term2) = case term1 of
+                             (Abs v t) -> (True, betaReduct v term2 t)
+                             (_)       -> if r1 then (True, App new1 term2)
+		                                else if r2 then (True, App term1 new2)
+					                   else (False, App term1 term2)
+						       where (r2, new2) = normSt term2
+					    where (r1, new1) = normSt term1
+
+normal :: Int -> Term -> Either TooLoong (Int, Term)
+normal = strat normSt
 
 -- Эту строчку после реализации стереть
-normal _ = normal'
 
 -- (*) Аналогичная нормализация аппликативным порядком.
--- applicative :: Int -> Term -> Either TooLoong (Int, Term)
--- applicative n term = ?
+
+applSt :: Term -> (Bool, Term)
+applSt (Var v) = (False, Var v)
+applSt (Abs v t) = (res, Abs v new)
+                     where (res, new) = applSt t
+applSt (App term1 term2) = let (r2, new2) = applSt term2 in
+                               if r2 then (True, App term1 new2)
+                                   else if r1 then (True, App new1 term2)
+				              else case term1 of
+					          (Abs v t) -> (True, betaReduct v term2 t)
+						  (_)       -> (False, App term1 term2)
+				          where (r1, new1) = applSt term1
+
+applicative :: Int -> Term -> Either TooLoong (Int, Term)
+applicative = strat applSt
 
 -- Эту строчку после реализации стереть
-applicative _ = applicative'
 
 -- (***) Придумайте и реализуйте обобщённую функцию, выражающую некоторое
 -- семейство стратегий редуцирования. В том смысле, что номальная, нормальная
