@@ -147,19 +147,25 @@ finiteTimeTest = take 10 $ foldr (:) [] $ repeat 1
 
 -- Склеивает список списков в список
 concat :: [[a]] -> [a]
-concat = ?
+concat [[]] = []
+concat (l:ll) = l ++ (concat ll)
 
 -- Эквивалент (concat . map), но эффективнее
 concatMap :: (a -> [b]) -> [a] -> [b]
-concatMap = ?
+concatMap f [] = []
+concatMap f (x:l) = (f x) ++ (concatMap f l)
 
 -- Сплющить два списка в список пар длинны min (length a, length b)
 zip :: [a] -> [b] -> [(a, b)]
-zip a b = ?
+zip [] b = []
+zip a [] = []
+zip (x:a) (y:b) = (x, y):(zip a b)
 
 -- Аналогично, но плющить при помощи функции, а не конструктором (,)
 zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
-zipWith = ?
+zipWith f [] b = []
+zipWith f a [] = []
+zipWith f (x:a) (y:b) = (f x y):(zipWith f a b)
 
 -- Интересные классы типов
 class Monoid a where
@@ -179,18 +185,20 @@ data MulRational = RMult Rational
 
 -- Реализуйте инстансы Monoid для Rational и MulRational
 instance Monoid Rational where
-    ?
+    mzero = 0
+    mappend = (+)
 
 instance Monoid MulRational where
-    ?
+    mzero = 1
+    (RMult a) `mappend` (RMult b) = RMult $ a * b
 
-instange Monoid MulInteger where
+instance Monoid MulInteger where
     mzero = 1
     (Mult a) `mappend` (Mult b) = Mult $ a * b
 
 -- Фолдабл
 class MFoldable t where
-    mfold :: Monoid a => t a -> a
+    mfold :: Monoid a => (t a -> a)
 
 -- Альтернативный фолдабл
 class Monoid a => AMFoldable t a where
