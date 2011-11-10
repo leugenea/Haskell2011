@@ -3,56 +3,69 @@ import Prelude
 
 -- Склеить два списка за O(length a)
 (++) :: [a] -> [a] -> [a]
-a ++ b = ?
+[] ++ b = b
+a:c ++ b = a:(c ++ b)
 
 -- Список без первого элемента
 tail :: [a] -> [a]
-tail = ?
+tail [] = error "!!: empty list"
+tail (x:a) = a
 
 -- Список без последнего элемента
 init :: [a] -> [a]
-init = ?
+init [] = error "!!: empty list"
+init (x:a) = if a == [] then x else x:(init a)
 
 -- Первый элемент
 head :: [a] -> a
-head = ?
+head [] = error "!!: empty list"
+head (x:a) = x
 
 -- Последний элемент
 last :: [a] -> a
-last = ?
+last [] = error "!!: empty list"
+last (x:a) = if a == [] then x else (last a)
 
 -- n первых элементов списка
 take :: Integer -> [a] -> [a]
-take = ?
+take 0 a = []
+take n [] = error "!!: not enough elements in list"
+take n (x:a) = x:(take (n-1) a)
 
 -- Список без n первых элементов
 drop :: Integer -> [a] -> [a]
-drop = ?
+drop 0 a = a
+drop n [] = error "!!: not enough elements in list"
+drop n (x:a) = drop (n-1) a
 
 -- Копировать из списка в результат до первого нарушения предиката
 -- takeWhile (< 3) [1,2,3,4,1,2,3,4] == [1,2]
 takeWhile :: (a -> Bool) -> [a] -> [a]
-takeWhile = ?
+takeWhile p [] = []
+takeWhile p (x:a) = if (p x) then (x:(takeWhile p a)) else []
 
 -- Не копировать из списка в результат до первого нарушения предиката,
 -- после чего скопировать все элементы, включая первый нарушивший
 -- dropWhile (< 3) [1,2,3,4,1,2,3,4] == [3,4,1,2,3,4]
 dropWhile :: (a -> Bool) -> [a] -> [a]
-dropWhile = ?
+dropWhile p [] = []
+dropWhile p (x:a) = if (p x) then (dropWhile p a) else (x:a)
 
 -- Разбить список в пару (найбольший префикс удовлетворяющий p, всё остальное)
 span :: (a -> Bool) -> [a] -> ([a], [a])
-span p = ?
+span p a = ((takeWhile p a), (dropWhile p a))
 
 -- Разбить список по предикату на (takeWhile p xs, dropWhile p xs),
 -- но эффективнее
 break :: (a -> Bool) -> [a] -> ([a], [a])
-break = ?
+break p [] = ([], [])
+break p (x:a) = if (p x) then (x:first, second) else ([], x:a) where (first, second) = (span p a)
 
 -- n-ый элемент списка (считая с нуля)
 (!!) :: [a] -> Integer -> a
 [] !! n = error "!!: empty list"
-l  !! n = ?
+(x:l) !! 0 = x
+(x:l) !! n = l !! (n-1)
 
 -- Список задом на перёд
 reverse :: [a] -> [a]
