@@ -73,13 +73,25 @@ reverse l = otherReverse l [] where r [] l = l
                                     r (x:a) l = r a (x:l)
 
 -- (*) Все подсписки данного списка
+append :: (a -> [[a]]) -> [[a]]
+append x xs = map (\l -> x:l) xs
+
+begins :: [a] -> [[a]]
+begins [] = [[]]
+begins (x:l) = []:(append x (begins l))
+
 subsequences :: [a] -> [[a]]
 subsequences [] = [[]]
-subsequences (x:xs) = (subsequences xs) ++ (append x (subsequences xs)) where append x xs = map (\l -> x:l) xs
+subsequences (x:xs) = (subsequences xs) ++ (append x (begins xs))
 
 -- (*) Все перестановки элементов данного списка
+insertAll (a -> [a]) -> [[a]]
+insertAll t [] = [[t]]
+insertAll t (x:l) = (t:(x:l)):(append x (insertAll t l))
+
 permutations :: [a] -> [[a]]
-permutations = ?
+permutations [] = [[]]
+permutations x:l = insertAll x (permutations l)
 
 -- Повторяет элемент бесконечное число раз
 repeat :: a -> [a]
