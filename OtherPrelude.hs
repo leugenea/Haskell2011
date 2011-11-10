@@ -14,7 +14,7 @@ tail (x:a) = a
 -- Список без последнего элемента
 init :: [a] -> [a]
 init [] = error "!!: empty list"
-init (x:a) = if a == [] then x else x:(init a)
+init (x:a) = if a == [] then [] else x:(init a)
 
 -- Первый элемент
 head :: [a] -> a
@@ -69,8 +69,8 @@ break p (x:a) = if (p x) then (x:first, second) else ([], x:a) where (first, sec
 
 -- Список задом на перёд
 reverse :: [a] -> [a]
-reverse l = otherReverse l [] where r [] l = l
-                                    r (x:a) l = r a (x:l)
+reverse l = r l [] where r [] l = l
+                         r (x:a) l = r a (x:l)
 
 -- (*) Все подсписки данного списка
 append :: (a -> [[a]]) -> [[a]]
@@ -85,17 +85,17 @@ subsequences [] = [[]]
 subsequences (x:xs) = (subsequences xs) ++ (append x (begins xs))
 
 -- (*) Все перестановки элементов данного списка
-insertAll (a -> [a]) -> [[a]]
+insertAll :: (a -> [a]) -> [[a]]
 insertAll t [] = [[t]]
 insertAll t (x:l) = (t:(x:l)):(append x (insertAll t l))
 
 permutations :: [a] -> [[a]]
 permutations [] = [[]]
-permutations x:l = insertAll x (permutations l)
+permutations (x:l) = insertAll x (permutations l)
 
 -- Повторяет элемент бесконечное число раз
 repeat :: a -> [a]
-repeat = ?
+repeat a = a:(repeat a)
 
 
 -- Левая свёртка
@@ -110,12 +110,14 @@ repeat = ?
 --  / \
 -- z  l!!0
 foldl :: (a -> b -> a) -> a -> [b] -> a
-foldl f z l = ?
+foldl f z [] = z
+foldl f z (x:l) = foldl f (f z x) l
 
 -- Тот же foldl, но в списке оказываются все промежуточные результаты
 -- last (scanl f z xs) == foldl f z xs
 scanl :: (a -> b -> a) -> a -> [b] -> [a]
-scanl = ?
+scanl f z [] = [z]
+scanl f z (x:l) = (f z x):(scanl f (f z x) l)
 
 -- Правая свёртка
 -- порождает такое дерево вычислений:
@@ -130,12 +132,14 @@ scanl = ?
 --            z
 --            
 foldr :: (a -> b -> b) -> b -> [a] -> b
-foldr f z l = ?
+foldr f z [] = z
+foldr f z (x:l) = f x (foldr f z l)
 
 -- Аналогично
 --  head (scanr f z xs) == foldr f z xs.
 scanr :: (a -> b -> b) -> b -> [a] -> [b]
-scanr = ?
+scanr f z [] = [z]
+scanr f z (x:l) = (f x (head res)):res where res = scanr f z l
 
 finiteTimeTest = take 10 $ foldr (:) [] $ repeat 1
 
