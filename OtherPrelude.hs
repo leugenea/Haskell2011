@@ -1,10 +1,18 @@
+--{-# LANGUAGE MultyParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances #-}
 module OtherPrelude where
-import Prelude
+import Prelude hiding ((++), tail, init, head, last, take, drop, takeWhile,
+                       dropWhile, span, (!!), reverse, repeat, foldl, scanl,
+		       foldr, scanr, map, concat, concatMap, zip, zipWith, break)
+
+map :: (a -> b) -> [a] -> [b]
+map f [] = []
+map f (x:l) = (f x):(map f l)
 
 -- Склеить два списка за O(length a)
 (++) :: [a] -> [a] -> [a]
 [] ++ b = b
-a:c ++ b = a:(c ++ b)
+(a:c) ++ b = a:(c ++ b)
 
 -- Список без первого элемента
 tail :: [a] -> [a]
@@ -14,7 +22,8 @@ tail (x:a) = a
 -- Список без последнего элемента
 init :: [a] -> [a]
 init [] = error "!!: empty list"
-init (x:a) = if a == [] then [] else x:(init a)
+init [x] = []
+init (x:a) = x:(init a)
 
 -- Первый элемент
 head :: [a] -> a
@@ -24,7 +33,8 @@ head (x:a) = x
 -- Последний элемент
 last :: [a] -> a
 last [] = error "!!: empty list"
-last (x:a) = if a == [] then x else (last a)
+last [x] = x
+last (x:a) = last a
 
 -- n первых элементов списка
 take :: Integer -> [a] -> [a]
@@ -73,8 +83,8 @@ reverse l = r l [] where r [] l = l
                          r (x:a) l = r a (x:l)
 
 -- (*) Все подсписки данного списка
-append :: (a -> [[a]]) -> [[a]]
-append x xs = map (\l -> x:l) xs
+append :: a -> [[a]] -> [[a]]
+append x xs = (map (\l -> x:l) xs)
 
 begins :: [a] -> [[a]]
 begins [] = [[]]
@@ -85,13 +95,17 @@ subsequences [] = [[]]
 subsequences (x:xs) = (subsequences xs) ++ (append x (begins xs))
 
 -- (*) Все перестановки элементов данного списка
-insertAll :: (a -> [a]) -> [[a]]
+insertAll :: a -> [a] -> [[a]]
 insertAll t [] = [[t]]
 insertAll t (x:l) = (t:(x:l)):(append x (insertAll t l))
 
+insertInAll :: a -> [[a]] -> [[a]]
+insertInAll t [] = []
+insertInAll t (l:ll) = (insertAll t l) ++ (insertInAll t ll)
+
 permutations :: [a] -> [[a]]
 permutations [] = [[]]
-permutations (x:l) = insertAll x (permutations l)
+permutations (x:l) = insertInAll x (permutations l)
 
 -- Повторяет элемент бесконечное число раз
 repeat :: a -> [a]
@@ -143,8 +157,6 @@ scanr f z (x:l) = (f x (head res)):res where res = scanr f z l
 
 finiteTimeTest = take 10 $ foldr (:) [] $ repeat 1
 
--- map f l = из первой лабораторной
-
 -- Склеивает список списков в список
 concat :: [[a]] -> [a]
 concat [[]] = []
@@ -184,33 +196,33 @@ data MulInteger = Mult Integer
 data MulRational = RMult Rational
 
 -- Реализуйте инстансы Monoid для Rational и MulRational
-instance Monoid Rational where
-    mzero = 0
-    mappend = (+)
+--instance Monoid Rational where
+--    mzero = 0
+--    mappend = (+)
 
-instance Monoid MulRational where
-    mzero = 1
-    (RMult a) `mappend` (RMult b) = RMult $ a * b
+--instance Monoid MulRational where
+--    mzero = 1
+--    (RMult a) `mappend` (RMult b) = RMult $ a * b
 
-instance Monoid MulInteger where
-    mzero = 1
-    (Mult a) `mappend` (Mult b) = Mult $ a * b
+--instance Monoid MulInteger where
+--    mzero = 1
+--    (Mult a) `mappend` (Mult b) = Mult $ a * b
 
 -- Фолдабл
-class MFoldable t where
-    mfold :: Monoid a => (t a -> a)
+--class MFoldable t where
+--    mfold :: Monoid a => (t a -> a)
 
 -- Альтернативный фолдабл
-class Monoid a => AMFoldable t a where
-    amfold :: t a -> a
+--class Monoid a => AMFoldable t a where
+--    amfold :: t a -> a
 -- Изучите раздницу между этими двумя определениями.
 
 -- Смотрите какой чит. Можно построить дерево только из элементов моноида.
-data MTree a = Monoid a => MLeaf | MNode a (MTree a) (MTree a)
+--data MTree a = Monoid a => MLeaf | MNode a (MTree a) (MTree a)
 
 -- Выпишите тип этого выражения. Фигурирует ли в нём Monoid? Почему?
-mtfold MLeaf = mzero -- А то, что a - моноид нам будет даровано самой природой
-mtfold (MNode a l r) = a `mappend` (mtfold l) `mappend` (mtfold r)
+--mtfold MLeaf = mzero -- А то, что a - моноид нам будет даровано самой природой
+--mtfold (MNode a l r) = a `mappend` (mtfold l) `mappend` (mtfold r)
 
 -- Напишите терм с типом
 -- (...) => MTree a -> x
@@ -219,16 +231,16 @@ mtfold (MNode a l r) = a `mappend` (mtfold l) `mappend` (mtfold r)
 -- констреинтах Monoid a быть не должно.
 -- Для широты фантазии в терме можно использовать классы типов, определённые в любом
 -- месте этого файла.
-mterm = ?
+--mterm = ?
 
 -- (**) Разберитесь чем отличаются эти определения.
 -- "Скомпилируйте" их в наш гипотетический язык программирования с
 -- типом Dict.
-instance MFoldable MTree where
-    mfold = mtfold
+--instance MFoldable MTree where
+--    mfold = mtfold
 
-instance Monoid a => AMFoldable MTree a where
-    amfold = mtfold
+--instance Monoid a => AMFoldable MTree a where
+--    amfold = mtfold
 
 --------- Тут переделаем немного
 -- Группа
@@ -248,42 +260,42 @@ instance Monoid a => AMFoldable MTree a where
 -- Хаскель слабоват для нормального определения всех этих штук.
 -- Кольцо вообще непонятно как определить, потому что группы и полугруппы
 -- должны быть по паре (тип, операция).
-class Monoid a => Group a where
-    ginv :: a -> a
+--class Monoid a => Group a where
+--    ginv :: a -> a
 
 -- Определите
 --instance Group для Integer, Rational, MulRational
 
 -- Группу и Абелеву группу в Хаскеле тоже не различить :(
-class Group a => Ring a where
+--class Group a => Ring a where
     -- mappend из моноида это сложение
-    rmul :: a -> a -> a -- а это умножение
+--    rmul :: a -> a -> a -- а это умножение
 
 -- Определите
 --instance Ring для Integer, Rational
 
 -- На самом деле коммутативное кольцо, но что поделать
-class Ring a => Field a where
-    rinv :: a -> a
+--class Ring a => Field a where
+--    rinv :: a -> a
 
 -- Определите
 --instance Field для Rational
 
 -- Реализуйте тип для матриц (через списки) и операции над ними
-data Matrix a = ?
+--data Matrix a = ?
 -- Чем должно быть a? Моноидом? Группой? Ещё чем-нибудь?
 
-matsum = ?
+--matsum = ?
 
-matscalarmul = ?
+--matscalarmul = ?
 
-matmul = ?
+--matmul = ?
 
 -- (**) Реализуйте классы типов для векторных и скалярных полей.
 -- Перепишите в этих терминах что-нибудь из написанного выше.
 -- Реализуйте оператор дифференцирования, взятия градиента.
-class ? ScalarField ? where
-    ?
+--class ? ScalarField ? where
+--    ?
 
-class ? VectorField ? where
-    ?
+--class ? VectorField ? where
+--    ?
