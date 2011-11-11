@@ -74,6 +74,7 @@ break p (x:a) = if (p x) then (x:first, second) else ([], x:a) where (first, sec
 -- n-ый элемент списка (считая с нуля)
 (!!) :: [a] -> Integer -> a
 [] !! n = error "!!: empty list"
+l !! n | n < 0 = error "!!: n < 0"
 (x:l) !! 0 = x
 (x:l) !! n = l !! (n-1)
 
