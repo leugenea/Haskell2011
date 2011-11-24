@@ -21,6 +21,8 @@ then
         fi
 fi
 
+#echo $QQEDIR $GETELEMFUNC
+
 function changeReferer() {
 	referer=$1
 #	echo "referer changed to $referer"
@@ -33,6 +35,12 @@ function changeDir() {
 
 function start4me() {
 	echo $@
+	echo $QQEDIR
+	if [ ! -e $QQEDIR ]
+	then
+		mkdir "$QQEDIR"
+	fi
+	echo "$$" > "$QQEDIR/.pid"
 }
 
 while getopts ":r:w:" opt; do
