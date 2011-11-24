@@ -31,7 +31,7 @@ while getopts ":r:w:" opt; do
 		;;
 
 		:)
-			echo "Argument required"
+			echo "Argument required -$OPTARG"
 			exit 1
 		;;
 
