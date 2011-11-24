@@ -4,6 +4,23 @@ referer=""
 GETELEMFUNC="wget"
 QQEDIR="~/.fetch4me"
 
+if [ -e ~/.fetch4merc ]
+then
+	s=`cat ~/.fetch4merc | grep QQEDIR=`
+	if [ "$s" != "" ]
+	then
+		QQEDIR=${s:7}
+		echo "QQEDIR readed from file ~/.fetch4merc. Now it's value is \"$QQEDIR\""
+	fi
+
+	s=`cat ~/.fetch4merc | grep GETELEMFUNC=`
+        if [ "$s" != "" ]
+        then
+                GETELEMFUNC=${s:12}
+                echo "GETELEMFUNC readed from file ~/.fetch4merc. Now it's value is \"$GETELEMFUNC\""
+        fi
+fi
+
 function changeReferer() {
 	referer=$1
 #	echo "referer changed to $referer"
