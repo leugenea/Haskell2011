@@ -1,0 +1,42 @@
+#!/bin/bash
+
+referer=""
+GETELEMFUNC="wget"
+QQEDIR="~/.fetch4me"
+
+function changeReferer() {
+	echo "cr"
+}
+
+function changeDir() {
+	echo "cd"
+}
+
+function start4me() {
+	echo $@
+}
+
+while getopts ":r:w:" opt; do
+	case $opt in
+		r)
+			changeReferer $OPTARG
+		;;
+
+		w)
+			changeDir $OPTARG
+		;;
+
+		:)
+			echo "Argument required"
+			exit 1
+		;;
+
+		*)
+			echo "Unknown arg -$OPTARG"
+			exit 1
+		;;
+	esac
+done
+
+shift $((OPTIND-1))
+start4me $@
