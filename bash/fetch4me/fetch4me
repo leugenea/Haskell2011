@@ -5,11 +5,13 @@ GETELEMFUNC="wget"
 QQEDIR="~/.fetch4me"
 
 function changeReferer() {
-	echo "cr"
+	referer=$1
+#	echo "referer changed to $referer"
 }
 
 function changeDir() {
-	echo "cd"
+	QQEDIR=$1
+#	echo "QQEDIR changed to $QQEDIR"
 }
 
 function start4me() {
