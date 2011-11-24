@@ -19,6 +19,10 @@ function start4me() {
 while getopts ":r:w:" opt; do
 	case $opt in
 		r)
+			if [ "$((OPTIND-1))" -eq "$#" ]
+			then
+				echo "It should be at least one URL (because -r used)"
+			fi
 			changeReferer $OPTARG
 		;;
 
