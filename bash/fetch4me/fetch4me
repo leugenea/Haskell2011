@@ -40,13 +40,24 @@ function getNormalName() {
 	tempurl=${tempurl//\//_}
 }
 
+function addTask() {
+	touch $QQEDIR/.queue
+	cp $QQEDIR/.queue $QQEDIR/.queuet
+	touch $QQEDIR/.queuet
+	echo $1 >> $QQEDIR/.queuet
+	mv $QQEDIR/.queuet $QQEDIR/.queue
+	getNormalName $1
+	echo $1 > $QQEDIR/$tempurl.ttask
+	mv $QQEDIR/$tempurl.ttask $QQEDIR/$tempurl.task
+	echo $referer > $QQEDIR/$tempurl.ttaskr
+        mv $QQEDIR/$tempurl.ttaskr $QQEDIR/$tempurl.taskr
+}
+
 function start4me() {
-	echo $QQEDIR
 	if [ ! -e $QQEDIR ]
 	then
 		mkdir -p $QQEDIR
 	fi
-	echo "$$" > "$QQEDIR/.pid"
 
 	if [ ! -e ~/Downloads ]
 	then
@@ -62,9 +73,7 @@ function start4me() {
 	fi
 	for i in $*
 	do
-		getNormalName $i
-		echo $tempurl
-#		wget -c 
+		addTask $i
 	done
 }
 
@@ -94,5 +103,28 @@ while getopts ":r:w:" opt; do
 	esac
 done
 
+state=""
+function chechIfStarted() {
+	ps ax | grep `cat $QQEDIR/.pid` > $QQEDIR/.temp
+	t=0
+	while read line
+	do
+		t=$((t+1))
+	done <$QQEDIR/.temp
+	rm $QQEDIR/.temp
+	if [ "$t" -eq 1 ]
+	then
+		state=notstarted
+	else
+		state=started
+	fi
+}
+
+function start() {
+	echo "$$" > "$QQEDIR/.pid"
+}
+
 shift $((OPTIND-1))
 start4me $@
+chechIfStarted
+echo $state
