@@ -33,14 +33,42 @@ function changeDir() {
 #	echo "QQEDIR changed to $QQEDIR"
 }
 
+tempurl=""
+function getNormalName() {
+	tempurl=$1
+}
+
 function start4me() {
-	echo $@
 	echo $QQEDIR
-	if [ ! -e $QQEDIR ]
+	if [ ! -e "$QQEDIR" ]
 	then
-		mkdir "$QQEDIR"
+#		mkdir "$QQEDIR"		??? WTF ???
+		echo "WTF?"
 	fi
 	echo "$$" > "$QQEDIR/.pid"
+
+	if [ ! -e "~/Downloads" ]
+	then
+		mkdir "~/Downloads"
+	fi
+	if [ ! -e "~/Downloads/fetched4you" ]
+	then
+		mkdir "~/Downloads/fetched4you"
+	fi
+	if [ ! -e "~/Downloads/fetched4you/$referer" ]
+	then
+		mkdir "~/Downloads/fetched4you/$referer"
+	fi
+	for i in $*
+	do
+		getNormalName $i
+		echo $tempurl
+		if [ ! -e "~/Downloads/fetched4you/$referer" ]
+		then
+			echo "?"
+		fi
+#		wget -c 
+	done
 }
 
 while getopts ":r:w:" opt; do
