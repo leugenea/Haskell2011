@@ -2,7 +2,7 @@
 
 referer=""
 GETELEMFUNC="wget"
-QQEDIR="~/.fetch4me"
+QQEDIR=~/.fetch4me
 
 if [ -e ~/.fetch4merc ]
 then
@@ -36,37 +36,34 @@ function changeDir() {
 tempurl=""
 function getNormalName() {
 	tempurl=$1
+	tempurl=${tempurl/*\/\//""}
+	tempurl=${tempurl//\//_}
 }
 
 function start4me() {
 	echo $QQEDIR
-	if [ ! -e "$QQEDIR" ]
+	if [ ! -e $QQEDIR ]
 	then
-#		mkdir "$QQEDIR"		??? WTF ???
-		echo "WTF?"
+		mkdir -p $QQEDIR
 	fi
 	echo "$$" > "$QQEDIR/.pid"
 
-	if [ ! -e "~/Downloads" ]
+	if [ ! -e ~/Downloads ]
 	then
-		mkdir "~/Downloads"
+		mkdir ~/Downloads
 	fi
-	if [ ! -e "~/Downloads/fetched4you" ]
+	if [ ! -e ~/Downloads/fetched4you ]
 	then
-		mkdir "~/Downloads/fetched4you"
+		mkdir ~/Downloads/fetched4you
 	fi
-	if [ ! -e "~/Downloads/fetched4you/$referer" ]
+	if [ ! -e ~/Downloads/fetched4you/$referer ]
 	then
-		mkdir "~/Downloads/fetched4you/$referer"
+		mkdir ~/Downloads/fetched4you/$referer
 	fi
 	for i in $*
 	do
 		getNormalName $i
 		echo $tempurl
-		if [ ! -e "~/Downloads/fetched4you/$referer" ]
-		then
-			echo "?"
-		fi
 #		wget -c 
 	done
 }
