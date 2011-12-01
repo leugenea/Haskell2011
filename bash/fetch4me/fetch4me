@@ -54,11 +54,6 @@ function addTask() {
 }
 
 function addTasks() {
-	if [ ! -e $QQEDIR ]
-	then
-		mkdir -p $QQEDIR
-	fi
-
 	if [ ! -e ~/Downloads/fetched4you/$referer ]
 	then
 		mkdir -p ~/Downloads/fetched4you/$referer
