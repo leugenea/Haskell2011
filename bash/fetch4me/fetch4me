@@ -1,7 +1,7 @@
 #!/bin/bash
 
-referer=""
-GETELEMFUNC="wget"
+referer=nyan
+GETELEMFUNC=wget
 QQEDIR=~/.fetch4me
 
 if [ -e ~/.fetch4merc ]
@@ -59,17 +59,9 @@ function addTasks() {
 		mkdir -p $QQEDIR
 	fi
 
-	if [ ! -e ~/Downloads ]
-	then
-		mkdir ~/Downloads
-	fi
-	if [ ! -e ~/Downloads/fetched4you ]
-	then
-		mkdir ~/Downloads/fetched4you
-	fi
 	if [ ! -e ~/Downloads/fetched4you/$referer ]
 	then
-		mkdir ~/Downloads/fetched4you/$referer
+		mkdir -p ~/Downloads/fetched4you/$referer
 	fi
 	for i in $*
 	do
@@ -105,26 +97,33 @@ done
 
 state=""
 function chechIfStarted() {
-	ps ax | grep `cat $QQEDIR/.pid` > $QQEDIR/.temp
-	t=0
-	while read line
-	do
-		t=$((t+1))
-	done <$QQEDIR/.temp
-	rm $QQEDIR/.temp
-	if [ "$t" -eq 1 ]
+	if [ -e $QQEDIR/.pid ]
 	then
-		state=notstarted
+		ps ax | grep `cat $QQEDIR/.pid` > $QQEDIR/.temp
+		t=0
+		while read line
+		do
+			t=$((t+1))
+		done <$QQEDIR/.temp
+		rm $QQEDIR/.temp
+		if [ "$t" -eq 1 ]
+		then
+			state=notstarted
+			echo "$$" > $QQEDIR/.pid
+		else
+			state=started
+		fi
 	else
-		state=started
+		state=notstarted
+		echo "$$" > $QQEDIR/.pid
 	fi
 }
 
-function start() {
-	echo "$$" > "$QQEDIR/.pid"
-}
-
 shift $((OPTIND-1))
+if [ ! -e $QQEDIR ]
+then
+	mkdir $QQEDIR
+fi
 addTasks $@
 chechIfStarted
 echo $state
