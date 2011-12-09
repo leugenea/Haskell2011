@@ -90,6 +90,12 @@ while getopts ":r:w:" opt; do
 	esac
 done
 
+function start4me() {
+	echo $@
+	addTasks $@
+	
+}
+
 state=""
 function chechIfStarted() {
 	if [ -e $QQEDIR/.pid ]
@@ -119,6 +125,10 @@ if [ ! -e $QQEDIR ]
 then
 	mkdir $QQEDIR
 fi
-addTasks $@
 chechIfStarted
+if [[ "$state" -eq "notstarted" ]]
+then
+	start4me $@
+fi
+addTasks $a
 echo $state
