@@ -73,7 +73,7 @@ class Monad3 m where
     (>=>) :: (a -> m b) -> (b -> m c) -> (a -> m c)
 
 --Laws:
---   ?
+--  x >=> y = join . (fmap y) x
 
 -- Show the relation between Monad3 and Category:
 --   ?
@@ -87,17 +87,21 @@ instance Monad1 m => Monad2 m where
     join mma = mma >>= id
 
 instance Monad1 m => Functor m where
-    fmap f ma = undefined
+    fmap f ma = ma >>= (return1 . f)
 
 instance Monad1 m => Applicative m where
     pure = return1
 
-    f <*> ma = undefined
+    mf <*> ma = do
+                  f <- mf
+		  a <- ma
+		  return1 (f a)
+--  mf <*> ma = mf >>=
+--              \f -> (ma >>= (\a -> return1 (f a)))
 
 instance Monad2 m => Monad1 m where
     return1 = return2
-
-    a >>= f = undefined
+    ma >>= f = join (fmap f ma)
 
 instance Monad3 m => Monad1 m where
     return1 = return3
@@ -107,4 +111,7 @@ instance Monad3 m => Monad1 m where
 instance Monad1 m => Monad3 m where
     return3 = return1
 
-    f >=> g = undefined
+    f >=> g = \x -> do
+                      y <- f x
+		      g y
+--            (\x -> ((f x) >>= (\y -> g y)))
