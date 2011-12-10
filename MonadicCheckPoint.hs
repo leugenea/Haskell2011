@@ -34,11 +34,11 @@ class Applicative f where
     pure :: a -> f a
     (<*>) :: f (a -> b) -> f a -> f b
 
---{- -- This is a nice pattern to comment out/uncomment something.
+{- -- This is a nice pattern to comment out/uncomment something.
 instance Applicative f => Functor f where -- This means
     fmap = (<*>) . pure                   -- I can deduce `Functor f` if
                                           -- given `Applicative f`.
----}
+-}
 --------------------------------------
 
 class Category cat where
@@ -59,7 +59,9 @@ class Monad1 m where
     return1 :: a -> m a
     (>>=) :: m a -> (a -> m b) -> m b
 
---(>>) :: ?
+(>>) :: Monad1 m => m x -> m y -> m y
+-- a :: m x
+-- (\_ -> b) :: (x -> m y)
 a >> b = a >>= (\_ -> b)
 
 class Functor m => Monad2 m where -- This means `fmap` is avaible
