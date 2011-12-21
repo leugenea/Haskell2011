@@ -1,0 +1,19 @@
+#! /bin/bash -e
+
+cat $1 > temp
+
+read title <temp
+
+echo '<html>'
+echo '<head>'
+echo '    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />'
+echo "    <title>$title</title>"
+echo '</head>'
+echo '<body>'
+
+sed -e 1d -e '/%/d;s/  */ /g' -e  's/^[ ]*\\section{\(.*\)}[ ]*$/\n<h1>\1<\/h1>\n/g' temp
+
+echo '</body>'
+echo '</html>'
+
+rm temp
