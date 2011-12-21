@@ -6,14 +6,6 @@ echo "   " >> temp
 
 read title <temp
 
-#count=0
-#while read title; do
-#	count=$(( count+1 ))
-#	if [[ "$title" =~ ^. ]]; then
-#		break
-#	fi
-#done < temp
-
 echo '<html>'
 echo '<head>'
 echo '    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />'
