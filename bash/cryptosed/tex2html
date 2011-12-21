@@ -11,7 +11,7 @@ echo "    <title>$title</title>"
 echo '</head>'
 echo '<body>'
 
-sed -e 1d -e '/%/d;s/  */ /g' -e  's/^[ ]*\\section{\(.*\)}[ ]*$/\n<h1>\1<\/h1>\n/g' temp
+sed -e 1d -e '/%/d;s/  */ /g' -e  's/^[ ]*\\section{\(.*\)}[ ]*$/\n<h1>\1<\/h1>\n/g' -e 's/^[ ]*\\subsection{\(.*\)}[ ]*$/\n<h2>\1<\/h2>\n/g' temp
 
 echo '</body>'
 echo '</html>'
