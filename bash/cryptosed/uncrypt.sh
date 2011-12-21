@@ -8,12 +8,14 @@ do
 		do
 			for l in {0..9}
 			do
-				pw = "$i$j$k$l"
-				7z e -y -p"$pw" tex2html-text.tar.7z
+				pw="$i$j$k$l"
+				7z e -y -p"$pw" tex2html-test.tar.7z > /dev/null
 				if (( $? == 0))
 				then
-					echo $pw
+					echo "$pw is right pw"
 					exit 0
+				else
+					echo "$pw is wrong pw"
 				fi
 			done
 		done
