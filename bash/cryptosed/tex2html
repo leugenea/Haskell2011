@@ -2,7 +2,17 @@
 
 cat $1 > temp
 
+echo "   " >> temp
+
 read title <temp
+
+#count=0
+#while read title; do
+#	count=$(( count+1 ))
+#	if [[ "$title" =~ ^. ]]; then
+#		break
+#	fi
+#done < temp
 
 echo '<html>'
 echo '<head>'
@@ -11,7 +21,7 @@ echo "    <title>$title</title>"
 echo '</head>'
 echo '<body>'
 
-sed -e 1d -e '/%/d;s/  */ /g' -e  's/^[ ]*\\section{\(.*\)}[ ]*$/\n<h1>\1<\/h1>\n/g' -e 's/^[ ]*\\subsection{\(.*\)}[ ]*$/\n<h2>\1<\/h2>\n/g' temp
+sed -e 1d -e '/%/d;s/  */ /g' -e  's/^[ ]*\\section{\(.*\)}[ ]*$/\n<h1>\1<\/h1>\n/g' -e 's/^[ ]*\\subsection{\(.*\)}[ ]*$/\n<h2>\1<\/h2>\n/g' temp | sed -e '/^[ ]*$/!{H;d}' -e '/^[ ]*$/{x;s/\n[ ]*\(.*\)/<p>\1<\/p>/;}' -e '/^[ ]*$/d' | sed -e 's/^<p>\(<h[12]>.*<\/h[12]>\)<\/p>$/\1/'
 
 echo '</body>'
 echo '</html>'
