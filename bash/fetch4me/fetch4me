@@ -2,13 +2,12 @@
 
 #default options
 config=~/.fetch4merc
-referer=nyan
+referer=""
 GETELEMFUNC=wget
 QQEDIR=~/.fetch4me
-
+download_dir=~/Downloads/fetched4you/
 source ~/.fetch4merc
-
-#echo $QQEDIR $GETELEMFUNC
+declare -a urls
 
 function changeReferer() {
 	referer=$1
@@ -51,36 +50,9 @@ function addTasks() {
 	done
 }
 
-while getopts ":r:w:" opt; do
-	case $opt in
-		r)
-			if [ "$((OPTIND-1))" -eq "$#" ]
-			then
-				echo "It should be at least one URL (because -r used)"
-			fi
-			changeReferer $OPTARG
-		;;
-
-		w)
-			changeDir $OPTARG
-		;;
-
-		:)
-			echo "Argument required -$OPTARG"
-			exit 1
-		;;
-
-		*)
-			echo "Unknown arg -$OPTARG"
-			exit 1
-		;;
-	esac
-done
-
 function start4me() {
-	echo $@
-	addTasks $@
-	
+	(trap '' HUP; exec ./fetch4me.sh)&
+	echo $! > "$QQEDIR/.pid"
 }
 
 state=""
@@ -107,6 +79,38 @@ function chechIfStarted() {
 	fi
 }
 
+if [ ! -d $download_dir ]
+then
+	mkdir -p $download_dir
+fi
+
+while getopts ":r:w:" opt
+do
+	case $opt in
+		r)
+			if [ "$((OPTIND-1))" -eq "$#" ]
+			then
+				echo "It should be at least one URL (because -r used)"
+			fi
+			changeReferer $OPTARG
+		;;
+
+		w)
+			changeDir $OPTARG
+		;;
+
+		:)
+			echo "Argument required -$OPTARG"
+			exit 1
+		;;
+
+		*)
+			echo "Unknown arg -$OPTARG"
+			exit 1
+		;;
+	esac
+done
+
 shift $((OPTIND-1))
 if [ ! -e $QQEDIR ]
 then
@@ -115,7 +119,7 @@ fi
 chechIfStarted
 if [[ "$state" -eq "notstarted" ]]
 then
-	start4me $@
+	start4me
 fi
 addTasks $a
 echo $state
