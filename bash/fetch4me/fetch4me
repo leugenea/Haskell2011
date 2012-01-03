@@ -1,25 +1,12 @@
-#!/bin/bash
+#!/bin/bash -e
 
+#default options
+config=~/.fetch4merc
 referer=nyan
 GETELEMFUNC=wget
 QQEDIR=~/.fetch4me
 
-if [ -e ~/.fetch4merc ]
-then
-	s=`cat ~/.fetch4merc | grep QQEDIR=`
-	if [ "$s" != "" ]
-	then
-		QQEDIR=${s:7}
-		echo "QQEDIR readed from file ~/.fetch4merc. Now it's value is \"$QQEDIR\""
-	fi
-
-	s=`cat ~/.fetch4merc | grep GETELEMFUNC=`
-        if [ "$s" != "" ]
-        then
-                GETELEMFUNC=${s:12}
-                echo "GETELEMFUNC readed from file ~/.fetch4merc. Now it's value is \"$GETELEMFUNC\""
-        fi
-fi
+source ~/.fetch4merc
 
 #echo $QQEDIR $GETELEMFUNC
 
