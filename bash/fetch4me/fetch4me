@@ -3,21 +3,22 @@
 #default options
 config=~/.fetch4merc
 referer=""
-GETELEMFUNC=wget
+GETELEMFUNC="wget -c"
 QQEDIR=~/.fetch4me
 download_dir=~/Downloads/fetched4you/
-source ~/.fetch4merc
+source $config
 declare -a urls
 
 function awrite() {
-	local args=("$@")
-	file=$(getNormalName $1)
-	touch "$file.temp"
-	for (( c=1; c < $#; c++ ))
+	local args=($@)
+	local dir=$1
+	local file=$(getNormalName $2)
+	touch $dir/$file.temp
+	for (( c=2; c < $#; c++ ))
 	do
-		echo ${args[$c]} >> "$file.temp"
+		echo ${args[$c]} >> $dir/$file.temp
 	done
-	mv "$file.temp" $file
+	mv $dir/$file.temp $dir/$file
 }
 
 function changeReferer() {
@@ -32,33 +33,17 @@ function changeDir() {
 
 function getNormalName() {
 	local tempurl=$1
-	tempurl=${tempurl/*\/\//""}
-	tempurl=${tempurl//\//_}
+	tempurl=${tempurl//\//%2F}
 	echo $tempurl
 }
 
 function addTask() {
-	touch $QQEDIR/.queue
-	cp $QQEDIR/.queue $QQEDIR/.queuet
-	echo $1 >> $QQEDIR/.queuet
-	mv $QQEDIR/.queuet $QQEDIR/.queue
 	if [ -z $referer ]
 	then
-		awrite $QQEDIR$1".task" " $1" "$1" "none"
+		awrite $QQEDIR $1.task " $1" "$1" "none"
 	else
-		awrite $QQEDIR$referer$1".task" " --referer $referer $1" "$1" "$referer"
+		awrite $QQEDIR $referer$1.task " --referer $referer $1" "$1" "$referer"
 	fi
-}
-
-function addTasks() {
-	if [ ! -e ~/Downloads/fetched4you/$referer ]
-	then
-		mkdir -p ~/Downloads/fetched4you/$referer
-	fi
-	for u in $urls
-	do
-		addTask $u
-	done
 }
 
 function start4me() {
@@ -81,13 +66,13 @@ function start4me() {
 	then
 		if [ $# -eq 0 ]
 		then
-			echo "At least one arg requireda"
+			echo "At least one arg required"
 			exit 1
 		fi
 		exit
 	fi
-
-	awrite $QQEDIR/.pid $$
+	
+	awrite $QQEDIR .pid $$
 }
 
 if [ ! -d $download_dir ]
@@ -127,7 +112,7 @@ c=0
 OPTIND=$((OPTIND-1))
 while [ $OPTIND -lt $# ]
 do
-	urls[$count]=${args[$OPTIND]}
+	urls[$c]=${args[$OPTIND]}
 	c=$((c+1))
 	OPTIND=$((OPTIND+1))
 done
@@ -137,8 +122,12 @@ then
 	mkdir $QQEDIR
 fi
 
-addTasks
-start4me
+for u in ${urls[@]}
+do
+	addTask $u
+done
+
+start4me $@
 
 cd $QQEDIR
 
