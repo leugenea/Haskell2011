@@ -62,32 +62,32 @@ function addTasks() {
 }
 
 function start4me() {
-	(trap '' HUP; exec ./fetch4me.sh)&
-	echo $! > "$QQEDIR/.pid"
-}
-
-state=""
-function chechIfStarted() {
-	if [ -e $QQEDIR/.pid ]
+	if [ ! -e $QQEDIR/.pid ]
 	then
-		ps ax | grep `cat $QQEDIR/.pid` > $QQEDIR/.temp
-		t=0
-		while read line
-		do
-			t=$((t+1))
-		done <$QQEDIR/.temp
-		rm $QQEDIR/.temp
-		if [ "$t" -eq 1 ]
-		then
-			state=notstarted
-			echo "$$" > $QQEDIR/.pid
-		else
-			state=started
-		fi
-	else
-		state=notstarted
-		echo "$$" > $QQEDIR/.pid
+		echo -1 > $QQEDIR/.pid
 	fi
+
+	exec < $QQEDIR/.pid
+	read pid
+	t=`ps axu | grep "^[a-zA-Z0-9]*[ ]*$pid"` || true
+	if [ -z "$t" ]
+	then
+		(trap '' HUP; exec ./fetch4me)&
+		echo $! > "$QQEDIR/.pid"
+		exit
+	fi
+	
+	if [ $$ != "$pid" ]
+	then
+		if [ $# -eq 0 ]
+		then
+			echo "At least one arg requireda"
+			exit 1
+		fi
+		exit
+	fi
+
+	awrite $QQEDIR/.pid $$
 }
 
 if [ ! -d $download_dir ]
@@ -125,23 +125,34 @@ done
 args=("$@")
 c=0
 OPTIND=$((OPTIND-1))
-while [ $OPTARG -lt $# ]
+while [ $OPTIND -lt $# ]
 do
 	urls[$count]=${args[$OPTIND]}
 	c=$((c+1))
 	OPTIND=$((OPTIND+1))
 done
 
-addTasks
-
 if [ ! -e $QQEDIR ]
 then
 	mkdir $QQEDIR
 fi
-chechIfStarted
-if [[ "$state" -eq "notstarted" ]]
+
+addTasks
+start4me
+
+cd $QQEDIR
+
+if [ ! -e ".finished" ]
 then
-	start4me
+	touch .finished
 fi
-addTasks $a
-echo $state
+
+if [ ! -e ".queue" ]
+then
+	touch .queue
+fi
+
+for (( ; ; ))
+do
+	declare -a queue
+done
