@@ -141,6 +141,11 @@ then
 	touch .queue
 fi
 
+if [ ! -e ".status" ]
+then
+	touch .status
+fi
+
 declare -a queue
 for (( ; ; ))
 do
@@ -172,19 +177,19 @@ do
 
 	if [ $qlen -eq 0 ]
 	then
-		echo "`date +%s`	Nothing to download" >> ".status"
+		echo "`date +%s`	Nothing to download" > ".status"
+		sleep 60
 	else
 		echo $queue
 		f=${queue[0]}
 		if [ -e $f ]
 		then
-			echo $f
 			exec < $f
 			read com
 			read url
 			read referer
 
-			awrite . ".status" "`date +%s`	Started download of $url throught $referer"
+			awrite "." ".status" "$(date +%s) Started download of $url throught $referer"
 		
 			if [ ! -d $download_dir$(getNormalName $referer) ]
 			then
@@ -193,11 +198,11 @@ do
 			
 			$GETELEMFUNC -O $download_dir$(getNormalName $referer)/$(getNormalName $url) $com ||
 			(
-				echo "Oh, fuck! I've crashed" > ".status"
+				echo "Oh, fuck! I've crashed and now I fall down the rabbit hole…" > ".status"
 				exit 1
 			)
 
-			echo "`date +%s`	$url throught $referer"
+			echo "`date +%s` $referer $url" >> .finished
 			rm $f
 		fi
 
