@@ -152,47 +152,53 @@ do
 		qlen=$((qlen+1))
 	done
 
-	for file in *.task
+	for f in *.task
 	do
-		queue[$qlen]=$file.started
-		qlen=$((qlen+1))
-		mv $file $file.started
+		if [ -e $f ]
+		then
+			queue[$qlen]=$f.started
+			qlen=$((qlen+1))
+			mv $f $f.started
+		fi
 	done
 	
 	touch .tempqueue
 	for (( i=0; i<$qlen; ++i))
 	do
-		echo queue[$i] >> .tempqueue
+		echo ${queue[$i]} >> .tempqueue
 	done
+	cat .tempqueue
 	mv .tempqueue .queue
 
-	if [ $qlen -eq 0]
+	if [ $qlen -eq 0 ]
 	then
 		echo "`date +%s`	Nothing to download" >> ".status"
 	else
-		if [ -e $file ]
+		echo $queue
+		f=${queue[0]}
+		if [ -e $f ]
 		then
-			file=${queue[0]}
-			exec < $file
-			read command
+			echo $f
+			exec < $f
+			read com
 			read url
 			read referer
 
-			awrite ".status" "`date +%s`	Started download of $url throught $referer"
+			awrite . ".status" "`date +%s`	Started download of $url throught $referer"
 		
 			if [ ! -d $download_dir$(getNormalName $referer) ]
 			then
 				mkdir -p $download_dir$(getNormalName $referer)
 			fi
-
-			$GETELEMFUNC" " -O "$download_dir$(getNormalName $referer)/$(getNormanName url)" $command ||
+			
+			$GETELEMFUNC -O $download_dir$(getNormalName $referer)/$(getNormalName $url) $com ||
 			(
 				echo "Oh, fuck! I've crashed" > ".status"
 				exit 1
 			)
 
 			echo "`date +%s`	$url throught $referer"
-			rm $file
+			rm $f
 		fi
 
 		queue=${queue[@]:1}
@@ -200,7 +206,7 @@ do
 		touch .tempqueue
 	        for (( i=0; i<$((qlen-1)); ++i))
         	do
-                	echo queue[$i] >> .tempqueue
+                	echo ${queue[$i]} >> .tempqueue
 	        done
         	mv .tempqueue .queue
 	fi
