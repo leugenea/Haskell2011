@@ -141,7 +141,69 @@ then
 	touch .queue
 fi
 
+declare -a queue
 for (( ; ; ))
 do
-	declare -a queue
+	exec < .queue
+	qlen=0
+	while read l
+	do
+		queue[$len]=$l
+		qlen=$((qlen+1))
+	done
+
+	for file in *.task
+	do
+		queue[$qlen]=$file.started
+		qlen=$((qlen+1))
+		mv $file $file.started
+	done
+	
+	touch .tempqueue
+	for (( i=0; i<$qlen; ++i))
+	do
+		echo queue[$i] >> .tempqueue
+	done
+	mv .tempqueue .queue
+
+	if [ $qlen -eq 0]
+	then
+		echo "`date +%s`	Nothing to download" >> ".status"
+	else
+		if [ -e $file ]
+		then
+			file=${queue[0]}
+			exec < $file
+			read command
+			read url
+			read referer
+
+			awrite ".status" "`date +%s`	Started download of $url throught $referer"
+		
+			if [ ! -d $download_dir$(getNormalName $referer) ]
+			then
+				mkdir -p $download_dir$(getNormalName $referer)
+			fi
+
+			$GETELEMFUNC" " -O "$download_dir$(getNormalName $referer)/$(getNormanName url)" $command ||
+			(
+				echo "Oh, fuck! I've crashed" > ".status"
+				exit 1
+			)
+
+			echo "`date +%s`	$url throught $referer"
+			rm $file
+		fi
+
+		queue=${queue[@]:1}
+
+		touch .tempqueue
+	        for (( i=0; i<$((qlen-1)); ++i))
+        	do
+                	echo queue[$i] >> .tempqueue
+	        done
+        	mv .tempqueue .queue
+	fi
+
+	sleep 2
 done
