@@ -177,7 +177,7 @@ do
 
 	if [ $qlen -eq 0 ]
 	then
-		echo "`date +%s`	Nothing to download" > ".status"
+		echo "$(date +%s) Nothing to download" > ".status"
 		sleep 60
 	else
 		echo $queue
@@ -202,7 +202,7 @@ do
 				exit 1
 			)
 
-			echo "`date +%s` $referer $url" >> .finished
+			echo "$(date +%s) $referer $url" >> .finished
 			rm $f
 		fi
 
