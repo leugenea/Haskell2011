@@ -1,5 +1,9 @@
 import System.Environment (getArgs)
-import Network (listenOn, withSocketsDo, PortID(..), Socket)
+import Network (listenOn, withSocketsDo, PortID(..), Socket, accept)
+import System.IO (Handle, hSetBuffering, BufferMode(..), hGetLine, hPutStr, hPutStrLn, hClose)
+import Control.Concurrent (forkIO)
+import System.Directory (doesFileExists)
+import Data.ByteString.Lazy
 
 
 main :: IO()
@@ -12,3 +16,28 @@ runServer port = withSocketsDo $ do
 	socketHandler socket
 
 socketHandler :: Socket -> IO ()
+socketHandler socket = do
+	(handle, host, port) <- accept socket
+	hSetBuffering handle NoBuffering
+	forkIO $ process handle
+	socketHandler socket
+
+process :: Handle -> IO ()
+process handle = do
+	l <- hGetLine handle
+	let wl = words l
+	case (head $ wl) of
+		"GET" -> do
+			let f = tail (wl !! 1)
+			exists <- doesFileExists f
+			if exists
+				then do
+					cont <- Lazy.readFile f
+					hPutStr handle ((wl !! 2) ++ "length:")
+					hPutStr handle (show (Lazy.lenght cont) + "\n")
+					Lazy.hPutStr handle cont
+				else do
+					hPutStrLn handle ("404 not found")
+		_     -> do
+			hPutStrLn handle ("404 not found")
+	hClose handle
