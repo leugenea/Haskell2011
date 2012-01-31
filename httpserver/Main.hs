@@ -2,7 +2,7 @@ import System.Environment (getArgs)
 import Network (listenOn, withSocketsDo, PortID(..), Socket, accept)
 import System.IO (Handle, hSetBuffering, BufferMode(..), hGetLine, hPutStr, hPutStrLn, hClose)
 import Control.Concurrent (forkIO)
-import System.Directory (doesFileExists)
+import System.Directory (doesFileExist)
 import Data.ByteString.Lazy
 
 
