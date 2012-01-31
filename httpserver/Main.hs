@@ -34,7 +34,7 @@ process handle = do
 				then do
 					cont <- BSL.readFile f
 					hPutStr handle ((wl !! 2) ++ "length:")
-					hPutStr handle (show (BSL.length cont) + "\n")
+					hPutStr handle (show (BSL.length cont) ++ "\n")
 					BSL.hPutStr handle cont
 				else do
 					hPutStrLn handle ("404 not found")
