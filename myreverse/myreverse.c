@@ -1,4 +1,5 @@
 #define BUFF_SIZE 10
+#include <stdlib.h>
 
 typedef struct
 {
@@ -6,9 +7,9 @@ typedef struct
   char* chars;
 } Buffer;
 
-Buffer* newBuff
+Buffer* newBuff()
 {
-  buff* = malloc(sizeof);
+  Buffer* buff = malloc(sizeof(Buffer));
   buff->chars = malloc(BUFF_SIZE);
   buff->size = 0;
   
