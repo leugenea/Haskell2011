@@ -25,10 +25,26 @@ int readBuff(Buffer* buff)
 
 int process(Buffer* buff)
 {
-  do
+  int beg = 0, end = 0, skip = 0;
+  while (1)
   {
+    int endOfWord = 0;
+    while (end < buff->size)
+    {
+      if (buff->chars[end] != '\n')
+      {
+	++end;
+      } else {
+	endOfWord = 1;
+	break;
+      }
+    }
     
-  } while (1);
+    if (endOfWord)
+    {
+      // TODO
+    }
+  }
   return 0;
 }
 
