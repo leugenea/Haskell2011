@@ -20,7 +20,7 @@ int readBuff(Buffer* buff)
 {
   int len = read(0, buff->chars + buff->size, BUFF_SIZE - buff->size);
   buff->size += len;
-  return 0;
+  return len;
 }
 
 int process(Buffer* buff)
@@ -42,12 +42,13 @@ int process(Buffer* buff)
     
     if (endOfWord)
     {
+      /*
       if (skip)		// word is tooooo looooong
       {
 	skip = 0;
 	beg = ++end;
 	continue;
-      }
+      }*/
       int i;
       for (i = 0; i < (end-beg+1)/2; ++i)
       {
@@ -59,9 +60,28 @@ int process(Buffer* buff)
       {
 	return -1;
       }
-      beg = ++last;
+      beg = ++end;
     } else {
-      // TODO
+      if ((beg == 0) && (end == BUFF_SIZE))
+      {
+	//skip = 1;
+	beg = 0;
+	end = 0;
+	buff->size = 0;
+	continue;
+      }
+      if (memmove(buff->chars, buff->chars+beg, beg-end) < 0)
+      {
+	return -2;
+      }
+      buff->size -= beg;
+      end = buff->size - 1;
+      beg = 0;
+      
+      if (readBuff(buff) < 0)
+      {
+	return -3;
+      }
     }
   }
   return 0;
@@ -70,7 +90,7 @@ int process(Buffer* buff)
 int main()
 {
   Buffer* buff = newBuff();
-  //process(buff);
+  //return process(buff);
   
   return 0;
 }
