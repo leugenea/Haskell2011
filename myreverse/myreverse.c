@@ -16,7 +16,26 @@ Buffer* newBuff()
   return buff;
 }
 
+int readBuff(Buffer* buff)
+{
+  int len = read(0, buff->chars + buff->size, BUFF_SIZE - buff->size);
+  buff->size += len;
+  return 0;
+}
+
+int process(Buffer* buff)
+{
+  do
+  {
+    
+  } while (1);
+  return 0;
+}
+
 int main()
 {
+  Buffer* buff = newBuff();
+  process(buff);
   
+  return 0;
 }
