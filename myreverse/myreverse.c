@@ -42,21 +42,14 @@ int process(Buffer* buff)
     
     if (endOfWord)
     {
-      /*
-      if (skip)		// word is tooooo looooong
-      {
-	skip = 0;
-	beg = ++end;
-	continue;
-      }*/
       int i;
-      for (i = 0; i < (end-beg+1)/2; ++i)
+      for (i = 0; i < (end-beg)/2; ++i)
       {
 	char t = buff->chars[beg+i];
-	buff->chars[beg+i] = buff->chars[end-i];
-	buff->chars[end-i] = t;
+	buff->chars[beg+i] = buff->chars[end-i-1];
+	buff->chars[end-i-1] = t;
       }
-      if (write(1, buff->chars+beg, end-beg+1))
+      if (write(1, buff->chars+beg, end-beg+1) < 0)
       {
 	return -1;
       }
@@ -64,7 +57,6 @@ int process(Buffer* buff)
     } else {
       if ((beg == 0) && (end == BUFF_SIZE))
       {
-	//skip = 1;
 	beg = 0;
 	end = 0;
 	buff->size = 0;
@@ -90,7 +82,5 @@ int process(Buffer* buff)
 int main()
 {
   Buffer* buff = newBuff();
-  //return process(buff);
-  
-  return 0;
+  return process(buff);
 }
