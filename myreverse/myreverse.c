@@ -42,6 +42,12 @@ int process(Buffer* buff)
     
     if (endOfWord)
     {
+      if (skip)
+      {
+	skip = 0;
+	beg = ++end;
+	continue;
+      }
       int i;
       for (i = 0; i < (end-beg)/2; ++i)
       {
@@ -60,6 +66,7 @@ int process(Buffer* buff)
 	beg = 0;
 	end = 0;
 	buff->size = 0;
+	skip = 1;
 	continue;
       }
       if (memmove(buff->chars, buff->chars+beg, beg-end) < 0)
