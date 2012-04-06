@@ -1,5 +1,6 @@
 #define BUFF_SIZE 10
 #include <stdlib.h>
+#include <stdio.h>
 
 typedef struct
 {
@@ -25,13 +26,13 @@ int readBuff(Buffer* buff)
 
 int process(Buffer* buff)
 {
-  int beg = 0, end = 0, skip = 0;
+  int beg = 0, end = -1, skip = 0;
   while (1)
   {
     int endOfWord = 0;
-    while (end < buff->size)
+    while (end+1 < buff->size)
     {
-      if (buff->chars[end] != '\n')
+      if (buff->chars[end+1] != '\n')
       {
 	++end;
       } else {
@@ -45,31 +46,34 @@ int process(Buffer* buff)
       if (skip)
       {
 	skip = 0;
-	beg = ++end;
+	beg = end + 1;
 	continue;
       }
       int i;
-      for (i = 0; i < (end-beg)/2; ++i)
+      for (i = 0; i < (end-beg+1)/2; ++i)
       {
 	char t = buff->chars[beg+i];
-	buff->chars[beg+i] = buff->chars[end-i-1];
-	buff->chars[end-i-1] = t;
+	buff->chars[beg+i] = buff->chars[end-i];
+	buff->chars[end-i] = t;
       }
-      if (write(1, buff->chars+beg, end-beg+1) < 0)
+      if (end-beg != -1)
       {
-	return -1;
+	if (write(1, buff->chars+beg, end-beg+2) < 0)
+	{
+	  return -1;
+	}
       }
-      beg = ++end;
+      beg = ++end + 1;
     } else {
-      if ((beg == 0) && (end == BUFF_SIZE))
+      if ((beg == 0) && (end == BUFF_SIZE-1))
       {
 	beg = 0;
-	end = 0;
+	end = -1;
 	buff->size = 0;
 	skip = 1;
 	continue;
       }
-      if (memmove(buff->chars, buff->chars+beg, beg-end) < 0)
+      if (memmove(buff->chars, buff->chars+beg, beg-end+1) < 0)
       {
 	return -2;
       }
