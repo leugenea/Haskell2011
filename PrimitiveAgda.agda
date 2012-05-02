@@ -19,13 +19,13 @@ data _≡_ {A : Set} (x : A) : A → Set where
 ≡refl refl = refl
 
 ≡trans : {A : Set}{a b c : A} → a ≡ b → b ≡ c → a ≡ c
-≡trans = {!!}
+≡trans refl refl = refl
 
 _~_ : {A : Set}{a b c : A} → a ≡ b → b ≡ c → a ≡ c
 _~_ = ≡trans
 
 cong : {A B : Set} {a b : A} → (f : A → B) → a ≡ b → f a ≡ f b
-cong = {!!}
+cong f refl = refl
 
 -- ⊥ is \bot
 -- Empty type.
