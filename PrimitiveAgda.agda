@@ -124,7 +124,8 @@ sx+y=x+sy {succ x} {y} = lemma-succ (sx+y=x+sy {x} {y})
 
 -- (*) Commutativity.
 comm : {x y : ℕ} → x + y ≡ y + x
-comm = {!!}
+comm {zero} {y} = y=y+0 {y}
+comm {succ x} {y} = (cong succ (comm {x} {y})) ~ (sx+y=x+sy {y} {x})
 -- Hint: dpohaboea=+=absfaojdf
 -- Caesar +1 code.
 --
