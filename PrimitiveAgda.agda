@@ -217,8 +217,9 @@ data Fin : ℕ → Set where
 
 -- Get an element from a Vec by its number.
 lookup : ∀ {A n} → Fin n → Vec A n → A
-lookup (fzero) (a :: [0]) = a
-lookup (fsucc fn) (a :: as) = a
+lookup () [0]
+lookup (fzero) (a :: as) = a
+lookup (fsucc fn) (a :: as) = lookup fn as
 
 list2vec : ∀ {A} → (l : List A) → Vec A (length l)
 list2vec [] = [0]
