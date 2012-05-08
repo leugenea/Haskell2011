@@ -208,6 +208,7 @@ head (a :: as) = a
 
 -- try this:
 --test1 = head [0]
+-- I tried this. OMG! Empty list doesn't have correct type Vec A (succ n)
 
 -- Finite type. Each Fin n has exactly n elements.
 data Fin : ℕ → Set where
@@ -216,10 +217,12 @@ data Fin : ℕ → Set where
 
 -- Get an element from a Vec by its number.
 lookup : ∀ {A n} → Fin n → Vec A n → A
-lookup = {!!}
+lookup (fzero) (a :: [0]) = a
+lookup (fsucc fn) (a :: as) = a
 
 list2vec : ∀ {A} → (l : List A) → Vec A (length l)
-list2vec = {!!}
+list2vec [] = [0]
+list2vec (a ∷ as) = a :: (list2vec as)
 
 data _×_ (A B : Set) : Set where
   _,_ : A → B → A × B
@@ -242,7 +245,13 @@ a ≤ b = Either (a ≡ b) (a < b)
 -- (**) If you give me a list and a proof that its length is less than n
 -- I'll give you a tuple (prefix of length n, suffix)
 cuthead : ∀ {A} {n : ℕ} → (l : List A) → n ≤ length l → Vec A n × List A
-cuthead = {!!}
+cuthead {A} {zero} l p = [0] , l
+cuthead {A} {succ n} [] (left ())
+cuthead {A} {succ n} [] (right ())
+cuthead {A} {succ n} (fl ∷ ls) (left rfl) = ((fl :: (fst oldch)) , snd oldch)
+  where oldch = cuthead {A} {n} ls (left (lemma-unsucc rfl))
+cuthead {A} {succ n} (fl ∷ ls) (right (s<s lss)) = ((fl :: (fst oldch)), snd oldch)
+  where oldch = cuthead {A} {n} ls (right lss)
 
 -- (***) Previous definition does not guarantee correct split
 -- (e.g. you can make up any suffix). Define a better one.
