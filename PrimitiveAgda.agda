@@ -255,7 +255,38 @@ cuthead {A} {succ n} (fl ∷ ls) (right (s<s lss)) = ((fl :: (fst oldch)), snd o
 
 -- (***) Previous definition does not guarantee correct split
 -- (e.g. you can make up any suffix). Define a better one.
--- splitn : ∀ {A} {n : ℕ} → ? → Vec A n × ?
+
+_-_ : ℕ → ℕ → ℕ
+zero - n = zero
+n - zero = n
+(succ n) - (succ k) = n - k
+
+infixl 20 _-_
+
+n-n=0 : (n : ℕ) → (n - n ≡ zero)
+n-n=0 zero = refl
+n-n=0 (succ n) = n-n=0 n
+
+a=ba-b=0 : {a b : ℕ} → (a ≡ b) → (a - b ≡ zero)
+a=ba-b=0 {a} {.a} refl = n-n=0 a
+
+lemma-sub : ∀ {a b : ℕ} → a ≤ b → a - b ≡ zero
+lemma-sub (left rfl) = a=ba-b=0 rfl
+lemma-sub (right z<s) = refl
+lemma-sub (right (s<s lss)) = lemma-sub (right lss)
+
+n-0=n : (n : ℕ) → n - zero ≡ n
+n-0=n zero = refl
+n-0=n (succ n) = refl
+
+splitn : ∀ {A} {n : ℕ} → (l : List A) → (n ≤ length l) → Vec A n × Vec A ((length l) - n)
+splitn {n = zero} l p = [0] , fst (cuthead {n = length l - zero} l (left (n-0=n (length l))))
+splitn {n = succ k} [] (left ())
+splitn {n = succ k} [] (right ())
+splitn {n = succ k} (lf ∷ ls) (left rfl) = (lf :: (fst oldsn)) , (snd oldsn)
+  where oldsn = splitn {n = k} ls (left (lemma-unsucc rfl))
+splitn {n = succ k} (lf ∷ ls) (right (s<s lss)) = (lf :: (fst oldsn)) , (snd oldsn)
+  where oldsn = splitn {n = k} ls (right lss)
 
 ------------------------------------------------------
 -- By the way, in Haskell you can have a kind of type-level naturals like this.
