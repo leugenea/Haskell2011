@@ -43,3 +43,11 @@ wk θ (Λ y) = Λ (wk (⊆cong Refl θ) y)
 
 weaking : ∀ {Γ A B} → Term Γ B → Term (A ∷ Γ) B
 weaking = wk xs⊆x∷xs
+
+x∷y∷s⊆y∷x∷s : ∀ {a} {A : Set a} {x y : A} {s : List A} → ((x ∷ y ∷ s) ⊆ (y ∷ x ∷ s))
+x∷y∷s⊆y∷x∷s Z = S Z
+x∷y∷s⊆y∷x∷s (S Z) = Z
+x∷y∷s⊆y∷x∷s (S (S n)) = S (S n)
+
+exchange : ∀ {Γ A B C} → Term (A ∷ B ∷ Γ) C → Term (B ∷ A ∷ Γ) C
+exchange = wk x∷y∷s⊆y∷x∷s
