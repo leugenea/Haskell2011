@@ -51,3 +51,10 @@ x∷y∷s⊆y∷x∷s (S (S n)) = S (S n)
 
 exchange : ∀ {Γ A B C} → Term (A ∷ B ∷ Γ) C → Term (B ∷ A ∷ Γ) C
 exchange = wk x∷y∷s⊆y∷x∷s
+
+x∈s,x∷s⊆s : ∀ {a} {A : Set a} {x : A} {s : List A} → (x ∈ s) → ((x ∷ s) ⊆ s)
+x∈s,x∷s⊆s m Z = m
+x∈s,x∷s⊆s m (S n) = n
+
+contraction : ∀ {Γ A B} → Term (A ∷ A ∷ Γ) B → Term (A ∷ Γ) B
+contraction = wk (x∈s,x∷s⊆s Z)
