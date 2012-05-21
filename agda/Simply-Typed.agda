@@ -36,6 +36,15 @@ data _≡_ {l : Level} {A : Set l} : A → A → Set l where
 xs⊆x∷xs : ∀ {a} {A : Set a} {y : A} {xs : List A} → (xs ⊆ (y ∷ xs))
 xs⊆x∷xs = S
 
+x∷y∷s⊆y∷x∷s : ∀ {a} {A : Set a} {x y : A} {s : List A} → ((x ∷ y ∷ s) ⊆ (y ∷ x ∷ s))
+x∷y∷s⊆y∷x∷s Z = S Z
+x∷y∷s⊆y∷x∷s (S Z) = Z
+x∷y∷s⊆y∷x∷s (S (S n)) = S (S n)
+
+x∈s,x∷s⊆s : ∀ {a} {A : Set a} {x : A} {s : List A} → (x ∈ s) → ((x ∷ s) ⊆ s)
+x∈s,x∷s⊆s m Z = m
+x∈s,x∷s⊆s m (S n) = n
+
 wk : ∀ {Γ Δ A} → (Γ ⊆ Δ) → Term Γ A → Term Δ A
 wk θ (Var y) = Var (θ y)
 wk θ (y₁ ∙ y₂) = wk θ y₁ ∙ wk θ y₂
@@ -44,17 +53,8 @@ wk θ (Λ y) = Λ (wk (⊆cong Refl θ) y)
 weaking : ∀ {Γ A B} → Term Γ B → Term (A ∷ Γ) B
 weaking = wk xs⊆x∷xs
 
-x∷y∷s⊆y∷x∷s : ∀ {a} {A : Set a} {x y : A} {s : List A} → ((x ∷ y ∷ s) ⊆ (y ∷ x ∷ s))
-x∷y∷s⊆y∷x∷s Z = S Z
-x∷y∷s⊆y∷x∷s (S Z) = Z
-x∷y∷s⊆y∷x∷s (S (S n)) = S (S n)
-
 exchange : ∀ {Γ A B C} → Term (A ∷ B ∷ Γ) C → Term (B ∷ A ∷ Γ) C
 exchange = wk x∷y∷s⊆y∷x∷s
-
-x∈s,x∷s⊆s : ∀ {a} {A : Set a} {x : A} {s : List A} → (x ∈ s) → ((x ∷ s) ⊆ s)
-x∈s,x∷s⊆s m Z = m
-x∈s,x∷s⊆s m (S n) = n
 
 contraction : ∀ {Γ A B} → Term (A ∷ A ∷ Γ) B → Term (A ∷ Γ) B
 contraction = wk (x∈s,x∷s⊆s Z)
